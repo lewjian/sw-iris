@@ -1,0 +1,12 @@
+{
+    "name": "lewjian/sw-iris",
+    "description": "a web api framework base on swoole",
+    "type": "webframework",
+    "authors": [
+        {
+            "name": "liujian",
+            "email": "cylar_lj@163.com"
+        }
+    ],
+    "require": {}
+}
