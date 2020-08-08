@@ -1,6 +1,7 @@
 <?php
 
 namespace iris;
+
 use iris\Config;
 use \Swoole\Http\Server;
 use \Swoole\Http\Request;
@@ -15,10 +16,12 @@ class App
     public static function run()
     {
         //高性能HTTP服务器
-        $http = new Server("127.0.0.1", 9501);
+        $addr = Env::get("LISTEN_ADDR", '127.0.0.1');
+        $port = Env::get("LISTEN_PORT", 9501);
+        $http = new Server($addr, $port);
 
-        $http->on("start", function ($server) {
-            echo "Swoole http server is started at http://127.0.0.1:9501\n";
+        $http->on("start", function ($server) use ($addr, $port) {
+            println("swoole http server listen at", "http://" . $addr . ":" . $port);
         });
 
         $http->on("request", function (Request $request, Response $response) {
@@ -39,8 +42,12 @@ class App
         $uri = $request->server['path_info'];
         // 尝试获取路由
         $matched = Router::tryMatch($uri, $request->server['request_method']);
+        $middlewares = Router::getGlobalMiddleware();
         if (!empty($matched)) {
-            (new Pipeline($request, $response, $matched[0], $matched[1]))->run();
+            if (isset($matched[2])) {
+                $middlewares = array_merge($middlewares, $matched[2]);
+            }
+            (new Pipeline($request, $response, $matched[0], $matched[1]))->withMiddleware($middlewares)->run();
         } else {
             $response->status(404);
         }

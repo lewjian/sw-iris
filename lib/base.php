@@ -17,6 +17,7 @@ define("CONFIG_PATH", ROOT . '/config');
 define("APP_PATH", ROOT . '/app');
 define("RUNTIME_PATH", ROOT . '/runtime');
 define("ROUTE_PATH", ROOT . '/route');
+define("MIDDLEWARE_PATH", ROOT . '/middleware');
 
 // 注册自动加载
 require_once IRIS_PATH . '/Loader.php';

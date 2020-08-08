@@ -1,10 +1,18 @@
 <?php
+
 namespace iris;
 
 use Swoole\Http\Response as SwResponse;
 
 class Response
 {
+
+    /**
+     * 最终响应数据
+     *
+     * @var string
+     */
+    public $resBody = '';
 
     /**
      * swoole的原始response
@@ -33,7 +41,31 @@ class Response
             $data = json_encode($data, 256);
         }
         $this->rawResponse->header("content-type", 'text/plain;charset=utf-8');
-        $this->rawResponse->end(strip_tags($data));
+        $this->setResBody(strip_tags($data));
+        $this->send();
+    }
+
+    /**
+     * 设置最终响应
+     *
+     * @param mixed $data
+     */
+    public function setResBody($data)
+    {
+        if (is_array($data)) {
+            $data = json_encode($data, 256);
+        }
+        $this->resBody = $data;
+    }
+
+    /**
+     * 获取响应报文
+     *
+     * @return string
+     */
+    public function getBody(): string
+    {
+        return $this->resBody;
     }
 
     /**
@@ -43,11 +75,9 @@ class Response
      */
     public function html($data)
     {
-        if (is_array($data)) {
-            $data = json_encode($data, 256);
-        }
         $this->rawResponse->header("content-type", 'text/html;charset=utf-8');
-        $this->rawResponse->end($data);
+        $this->setResBody($data);
+        $this->send();
     }
 
     /**
@@ -57,24 +87,18 @@ class Response
      */
     public function json($data)
     {
-        if (is_array($data)) {
-            $data = json_encode($data, 256);
-        }
         $this->rawResponse->header("content-type", 'application/json;charset=utf-8');
-        $this->rawResponse->end($data);
+        $this->setResBody($data);
+        $this->send();
     }
 
     /**
      * 发送报文到前端
      *
-     * @param $data
      */
-    public function send($data)
+    public function send()
     {
-        if (is_array($data)) {
-            $data = json_encode($data, 256);
-        }
-        $this->rawResponse->end($data);
+        $this->rawResponse->end($this->resBody);
     }
 
     /**

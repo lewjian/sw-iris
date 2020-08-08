@@ -24,3 +24,12 @@ function scanDirFiles($root): array
     return $data;
 }
 
+/**
+ * 打印一行数据
+ *
+ * @param mixed ...$args
+ */
+function println(...$args)
+{
+    printf(join("\t", $args) . "\n");
+}

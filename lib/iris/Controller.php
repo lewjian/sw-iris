@@ -4,32 +4,34 @@ namespace iris;
 
 class Controller
 {
+    /**
+     * @var Request|null
+     */
     protected $request = null;
+    /**
+     * @var Response|null
+     */
     protected $response = null;
 
     /**
      * Controller constructor.
      * @param Request $request
-     * @param Response $response
      */
-    public function __construct(Request $request, Response &$response)
+    public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->response = $response;
+        $this->response = $request->response;
     }
 
     /**
      * 输出json
      *
      * @param mixed $data
-     * @return string
+     * @return mixed
      */
-    protected function json($data): string
+    protected function json($data)
     {
-        $this->response->setHeader("content-type", "application/json;charset=utf-8");
-        if (is_array($data)) {
-            $data = json_encode($data, 256);
-        }
-        return  $data;
+        $this->response->setHeader("content-type", 'application/json;charset=utf-8');
+        return $data;
     }
 }

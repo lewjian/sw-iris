@@ -2,6 +2,7 @@
 
 namespace iris;
 
+use middleware\M2;
 use Swoole\Http\Request as SwRequest;
 
 class Request
@@ -13,6 +14,10 @@ class Request
      */
     public $rawRequest = null;
 
+    public $params = [];
+
+    public $response = null;
+
     /**
      * Request constructor.
      * @param SwRequest $request
@@ -20,6 +25,49 @@ class Request
     public function __construct(SwRequest $request)
     {
         $this->rawRequest = $request;
+    }
+
+    /**
+     * 设置param
+     *
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setParam($key, $value)
+    {
+        $this->params[$key] = $value;
+    }
+
+    /**
+     * 获取param
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed|null
+     */
+    public function getParam($key, $default = null)
+    {
+        return $this->params[$key] ?? $default;
+    }
+
+    /**
+     * 获取http method
+     *
+     * @return string
+     */
+    public function getHttpMethod(): string
+    {
+        return $this->rawRequest->server['request_method'];
+    }
+
+    /**
+     * 获取浏览器UA
+     *
+     * @return string
+     */
+    public function getUA(): string
+    {
+        return $this->rawRequest->header['user-agent'];
     }
 
     /**

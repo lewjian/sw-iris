@@ -1,4 +1,5 @@
 <?php
+
 namespace iris;
 /**
  * 自动加载类
@@ -17,7 +18,8 @@ class Loader
      */
     public static $namespaceMap = [
         'app' => APP_PATH,
-        'iris' => IRIS_PATH
+        'iris' => IRIS_PATH,
+        'middleware' => MIDDLEWARE_PATH,
     ];
 
     /**
@@ -49,6 +51,6 @@ class Loader
      */
     public static function register()
     {
-        spl_autoload_register('\iris\Loader::autoload'  , true, true);
+        spl_autoload_register('\iris\Loader::autoload', true, true);
     }
 }

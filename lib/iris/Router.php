@@ -1,4 +1,5 @@
 <?php
+
 namespace iris;
 
 use Exception;
@@ -17,6 +18,31 @@ class Router
         'ANY' => []
     ];
 
+    protected static $globalMiddleware = [];
+
+    /**
+     * 注册中间件
+     *
+     * @param string ...$middleware
+     */
+    public static function use(string ...$middleware)
+    {
+        foreach ($middleware as $m) {
+            if (!in_array($m, self::$globalMiddleware)) {
+                self::$globalMiddleware[] = $m;
+            }
+        }
+    }
+
+    /**
+     * 获取全局中间件
+     * @return array
+     */
+    public static function getGlobalMiddleware(): array
+    {
+        return self::$globalMiddleware;
+    }
+
     /**
      * 设置一个get请求路由
      *
@@ -32,15 +58,15 @@ class Router
         if (substr($uri, 0, 1) != '/') {
             $uri = '/' . $uri;
         }
-       if (!class_exists($class)) {
-           throw new Exception("class：{$class}不存在");
-       }
-       $reflectClass = new \ReflectionClass($class);
-       if (!$reflectClass->hasMethod($action)) {
-           throw new Exception("method：{$action}不存在");
-       }
+        if (!class_exists($class)) {
+            throw new Exception("class：{$class}不存在");
+        }
+        $reflectClass = new \ReflectionClass($class);
+        if (!$reflectClass->hasMethod($action)) {
+            throw new Exception("method：{$action}不存在");
+        }
 
-       self::$routerMaps['GET'][$uri] = [$class, $action];
+        self::$routerMaps['GET'][$uri] = [$class, $action];
     }
 
     /**

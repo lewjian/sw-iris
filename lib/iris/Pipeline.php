@@ -1,4 +1,5 @@
 <?php
+
 namespace iris;
 
 use Swoole\Http\Request as SwRequest;
@@ -21,6 +22,8 @@ class Pipeline
     protected $controller = null;
     protected $action = null;
 
+    protected $middlewares = [];
+
     /**
      * Pipeline constructor.
      * @param SwRequest $request
@@ -32,8 +35,21 @@ class Pipeline
     {
         $this->request = new Request($request);
         $this->response = new Response($response);
+        $this->request->response = $this->response;
         $this->controller = $controller;
         $this->action = $action;
+    }
+
+    /**
+     * 注册中间件
+     *
+     * @param array $middlewares
+     * @return Pipeline
+     */
+    public function withMiddleware(array $middlewares): Pipeline
+    {
+        $this->middlewares = $middlewares;
+        return $this;
     }
 
     /**
@@ -41,8 +57,36 @@ class Pipeline
      */
     public function run()
     {
-       $instance = new $this->controller($this->request, $this->response);
-       $data = $instance->{$this->action}();
-       $this->response->send($data);
+        $response = $this->handleWithMiddleware($this->request, $this->middlewares);
+        $response->send();
+    }
+
+    /**
+     * 处理请求
+     *
+     * @param Request $request
+     * @param array $middlewares
+     * @return Response
+     */
+    public function handleWithMiddleware(Request $request, array $middlewares): Response
+    {
+        $pipeline = array_reduce(array_reverse($middlewares), function ($carry, $middleware) {
+            return function ($request) use ($carry, $middleware) {
+                return $middleware::handle($request, $carry);
+            };
+        }, function ($request) {
+            $controller = new $this->controller($request);
+            $reflect = new \ReflectionClass($controller);
+            if ($reflect->hasMethod("beforeAction")) {
+                $reflect->getMethod("beforeAction")->invoke($controller);
+            }
+            $output = $reflect->getMethod($this->action)->invoke($controller);
+            if ($reflect->hasMethod("afterAction")) {
+                $reflect->getMethod("afterAction")->invoke($controller);
+            }
+            $request->response->setResBody($output);
+            return $request->response;
+        });
+        return $pipeline($request);
     }
 }
