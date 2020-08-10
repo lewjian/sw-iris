@@ -2,7 +2,6 @@
 
 namespace iris;
 
-use iris\Config;
 use \Swoole\Http\Server;
 use \Swoole\Http\Request;
 use \Swoole\Http\Response;
@@ -15,7 +14,9 @@ class App
      */
     public static function run()
     {
-        //高性能HTTP服务器
+        // 注册错误处理
+        ErrorHandle::registerErrorHandle(Config::get("log.log_level"));
+
         $addr = Env::get("LISTEN_ADDR", '127.0.0.1');
         $port = Env::get("LISTEN_PORT", 9501);
         $http = new Server($addr, $port);
@@ -36,20 +37,32 @@ class App
      *
      * @param Request $request
      * @param Response $response
+     * @return Response
      */
-    protected static function handle(Request $request, Response $response)
+    protected static function handle(Request $request, Response $response): Response
     {
         $uri = $request->server['path_info'];
         // 尝试获取路由
         $matched = Router::tryMatch($uri, $request->server['request_method']);
         $middlewares = Router::getGlobalMiddleware();
-        if (!empty($matched)) {
-            if (isset($matched[2])) {
-                $middlewares = array_merge($middlewares, $matched[2]);
+        if (empty($matched)) {
+            $_404 = Config::get("http_404");
+            if (is_array($_404)) {
+                $matched = $_404;
+            } else {
+                $response->status(404);
+                $response->end($_404);
+                return $response;
             }
-            (new Pipeline($request, $response, $matched[0], $matched[1]))->withMiddleware($middlewares)->run();
-        } else {
-            $response->status(404);
         }
+        if (isset($matched[2])) {
+            foreach ($matched[2] as $m) {
+                if (!in_array($m, $middlewares)) {
+                    $middlewares[] = $m;
+                }
+            }
+        }
+        (new Pipeline($request, $response, $matched[0], $matched[1]))->withMiddleware($middlewares)->run();
+        return $response;
     }
 }

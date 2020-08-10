@@ -9,12 +9,13 @@
 ├─lib # 框架核心库
 │  └─iris
 ├─route # 路由配置
+├─middleware # 中间件
 └─runtime # 运行时文件，如日志，非必须
 ```
 
 ## 使用前提
 - 运行于linux环境，windows请用wsl
-- 正确安装PHP和swoole，[swoole安装参考](https://wiki.swoole.com/)
+- 正确安装PHP和swoole，[swoole安装参考](https://wiki.swoole.com/)，开发此项目的时候使用的swoole版本是4.5.4-beta，php版本是7.4.3。其他版本未测试。
 
 ## 快速demo
 - clone项目
@@ -25,3 +26,6 @@ git clone https://github.com/lewjian/sw-iris.git
 ```
 php server.php
 ```
+
+## todo
+- 数据库

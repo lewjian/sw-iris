@@ -29,6 +29,7 @@ class Index extends Controller
      */
     public function beforeAction()
     {
+        trigger_error("this is my error", E_USER_WARNING);
         println("this method called before");
     }
 
@@ -38,5 +39,13 @@ class Index extends Controller
     public function afterAction()
     {
         println("this method called after");
+    }
+
+    /**
+     * 统一处理404请求
+     */
+    public function handle404()
+    {
+        return "url not exists";
     }
 }

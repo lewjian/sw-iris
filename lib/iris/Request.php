@@ -16,6 +16,9 @@ class Request
 
     public $params = [];
 
+    /**
+     * @var null|Response
+     */
     public $response = null;
 
     /**
@@ -58,6 +61,19 @@ class Request
     public function getHttpMethod(): string
     {
         return $this->rawRequest->server['request_method'];
+    }
+
+    /**
+     * 中间停止http请求
+     *
+     * @param int $statusCode
+     * @param string $statusMsg
+     * @return Response
+     */
+    public function abort($statusCode, $statusMsg = ''): Response
+    {
+        $this->response->rawResponse->status($statusCode, $statusMsg);
+        return $this->response;
     }
 
     /**
