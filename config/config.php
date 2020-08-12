@@ -13,8 +13,16 @@ return [
         'username' => Env::get("db_username", ""),
         'password' => Env::get("db_password", ""),
         'db_name' => Env::get("db_database", ""),
-        'charset' => Env::get("db_charset", "utf-8"),
+        'charset' => Env::get("db_charset", "utf8mb4"),
         'port' => Env::get("db_port", "3306"),
+        'pool' => [
+            // 连接池大小
+            'size' => Env::get("pool_size", 100),
+            // 最多空闲连接数量
+            'idle_size' => Env::get("pool_idle_size", 10),
+            // 连接最长生存时间
+            'lifetime' => Env::get("pool_lifetime", 7200)
+        ]
     ],
     /*
      * -----------------------------------------------------------------

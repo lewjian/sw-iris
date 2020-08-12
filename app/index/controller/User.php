@@ -3,19 +3,14 @@
 namespace app\index\controller;
 
 use iris\Controller;
+use iris\datasource\Db;
 
 class User extends Controller
 {
     public function getUserInfo()
     {
-        return $this->json([
-            'status' => 0,
-            'data' => [
-                'id' => 10072,
-                'name' => "thomas",
-                'createAt' => '2020-01-24 12:08:35'
-            ]
-        ]);
+        $user = Db::query("select * from user")->fetchAll();
+        return $this->json($user);
     }
 
     public function updateUser()
