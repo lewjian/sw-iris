@@ -15,7 +15,7 @@
 
 ## 使用前提
 - 运行于linux环境，windows请用wsl
-- 正确安装PHP和swoole，[swoole安装参考](https://wiki.swoole.com/)，开发此项目的时候使用的swoole版本是4.5.4-beta，php版本是7.4.3。其他版本未测试。
+- 正确安装PHP和swoole，[swoole安装参考](https://wiki.swoole.com/)，开发此项目的时候使用的swoole版本是4.5.2，php版本是7.4.3。其他版本未测试。
 
 ## 快速demo
 - clone项目
@@ -28,4 +28,4 @@ php server.php
 ```
 
 ## todo
-- 数据库
+- benchmark
