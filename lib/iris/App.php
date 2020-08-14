@@ -3,6 +3,7 @@
 namespace iris;
 
 use iris\datasource\Db;
+use iris\datasource\Mysql;
 use \Swoole\Http\Server;
 use \Swoole\Http\Request;
 use \Swoole\Http\Response;
@@ -16,20 +17,25 @@ class App
     public static function run()
     {
         try {
+
             // 注册错误处理
             ErrorHandle::registerErrorHandle(Config::get("log.log_level"));
-            Db::init();
 
             $addr = Env::get("LISTEN_ADDR", '127.0.0.1');
             $port = Env::get("LISTEN_PORT", 9501);
+
             $http = new Server($addr, $port);
+            $http->set([
+//                'worker_num' => 1
+            ]);
 
             $http->on("start", function ($server) use ($addr, $port) {
                 println("swoole http server listen at", "http://" . $addr . ":" . $port);
             });
+
             $http->on("workerStart", function ($server, $workId) {
                 // 数据库初始化
-                Db::bootstrap();
+                Db::init();
             });
 
             $http->on("request", function (Request $request, Response $response) {

@@ -65,7 +65,7 @@ class Response
      */
     public function getBody(): string
     {
-        return $this->resBody;
+        return $this->resBody ?? "";
     }
 
     /**

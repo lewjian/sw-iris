@@ -31,5 +31,5 @@ function scanDirFiles($root): array
  */
 function println(...$args)
 {
-    printf(join("\t", $args) . "\n");
+    printf(join(" ", $args) . "\n");
 }

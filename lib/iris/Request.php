@@ -31,6 +31,16 @@ class Request
     }
 
     /**
+     * 获取url
+     *
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->rawRequest->server['request_uri'] . '?' . $this->rawRequest->server['query_string'];
+    }
+
+    /**
      * 设置param
      *
      * @param string $key

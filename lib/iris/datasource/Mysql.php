@@ -8,6 +8,8 @@ class Mysql implements Closer
 {
     private $_con = null;
 
+
+    private $_createAt = null;
     /**
      * Mysql constructor.
      * @param string $host
@@ -21,14 +23,24 @@ class Mysql implements Closer
     {
         try {
             $dsn = sprintf("mysql:host=%s;dbname=%s;port=%d;charset=%s", $host, $dbName, $port, $charset);
-            println($dsn, $user, $password);
             $this->_con = new \PDO($dsn, $user, $password, [
-                \PDO::ATTR_PERSISTENT => true
             ]);
+            $this->_createAt = time();
         } catch (\PDOException $exception) {
             println($exception->getMessage(), $exception->getFile(), $exception->getLine());
             exit();
         }
+    }
+
+    /**
+     * 是否过期
+     *
+     * @param int $expiredIn
+     * @return mixed|void
+     */
+    public function isExpired(int $expiredIn):bool
+    {
+        return $this->_createAt + $expiredIn < time();
     }
 
     /**
@@ -39,11 +51,17 @@ class Mysql implements Closer
         $this->_con = null;
     }
 
+    /**
+     * @param string $name
+     * @param array $arguments
+     * @return mixed
+     * @throws \ReflectionException
+     */
     public function __call($name, $arguments)
     {
         $ref = new \ReflectionClass($this->_con);
         if ($ref->hasMethod($name)) {
-            $this->_con->{$name}(...$arguments);
+            return $this->_con->{$name}(...$arguments);
         }
     }
 }

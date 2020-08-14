@@ -6,6 +6,7 @@ use Closure;
 use iris\contract\Closer;
 use Swoole\Atomic;
 use Swoole\Coroutine\Channel;
+use Swoole\Timer;
 
 class Pool
 {
@@ -59,11 +60,18 @@ class Pool
     private $_buffChan = null;
 
     /**
-     * 操作超时时间，100ms
+     * 操作超时时间，50ms
      *
      * @var float
      */
-    private $_timeout = 0.1;
+    private $_timeout = 0.05;
+
+    /**
+     * 连接池里面的链接到期时间检测间隔
+     *
+     * @var float|int
+     */
+    private $_expireCheckInterval = 1000 * 30;
 
 
     /**
@@ -84,8 +92,7 @@ class Pool
         $this->expiresIn = $expiresIn;
         $this->newConnectFunction = $newConnectFunction;
         $this->_connectCount = new Atomic();
-        // 初始化
-        $this->init();
+        $this->autoCloseConnectTimer();
     }
 
     /**
@@ -93,16 +100,19 @@ class Pool
      */
     public function init()
     {
-        $this->_buffChan = new Channel($this->size);
-        println("size", $this->size, 'idlesize', $this->idleSize);
-        for ($i = 0; $i < $this->idleSize; $i++) {
-            $source = $this->acquireNew();
-            if (false === $this->_buffChan->push($source, $this->_timeout)) {
-                throw new \Exception("push channel失败");
-            }
-            $this->_connectCount->add();
+        if (!$this->_buffChan) {
+            $this->_buffChan = new Channel($this->size);
         }
-        println("total", $this->_connectCount->get());
+        $len = $this->_buffChan->length();
+        if ($len < $this->idleSize) {
+            for ($i = 0; $i < $this->idleSize - $len; $i++) {
+                $source = $this->acquireNew();
+                if (false === $this->_buffChan->push($source, $this->_timeout)) {
+                    throw new \Exception("push channel失败");
+                }
+                $this->_connectCount->add();
+            }
+        }
     }
 
     /**
@@ -126,14 +136,11 @@ class Pool
     {
         // 检查通道是否为空
         if (!$this->_buffChan->isEmpty()) {
-            println("连接池不为空");
             $source = $this->_buffChan->pop($this->_timeout);
             if (false !== $source) {
-                println("获取连接成功");
                 return $source;
             }
         }
-        println("连接池为空");
         $num = $this->_connectCount->add();
         if ($num > $this->_maxAllowConnection) {
             $this->_connectCount->sub();
@@ -177,5 +184,29 @@ class Pool
             $this->_connectCount->sub();
         }
         $this->_buffChan->close();
+    }
+
+    /**
+     * 定时清理过期连接
+     */
+    public function autoCloseConnectTimer()
+    {
+        Timer::tick($this->_expireCheckInterval, function (int $timerId, ...$params) {
+            $len = $this->_buffChan->length();
+            for ($i = 0; $i < $len; $i++) {
+                $source = $this->get();
+                if (!$source) {
+                    break;
+                }
+                if ($source->isExpired($this->expiresIn)) {
+                    $source->close();
+                    unset($source);
+                } else {
+                    $this->push($source);
+                }
+            }
+            // 防止所有连接全被清理
+            $this->init();
+        });
     }
 }

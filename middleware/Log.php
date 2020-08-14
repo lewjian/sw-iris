@@ -14,7 +14,7 @@ class Log extends Middleware
         $response = $next($request);
         $end_tm = microtime(true);
         println(date("Y-m-d H:i:s", intval($start_tm)), $request->clientIp(),
-            $request->getHttpMethod(), $end_tm - $start_tm, $request->getUA(), $response->getBody());
+            $request->getHttpMethod(), sprintf("%.4f", $end_tm - $start_tm), $request->getUrl(), $request->getRawBody(), $response->getBody(), $request->getUA());
         return $response;
     }
 }
