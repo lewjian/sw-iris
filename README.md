@@ -26,6 +26,13 @@ git clone https://github.com/lewjian/sw-iris.git
 ```
 php server.php
 ```
+## 优势
+1. 快：具体可以看下面的和laravel的ab benchmark，不是很严谨，但是还是能明显看出差别
+2. 中间件支持：支持全局、群组和具体路由
+3. controller支持：左右逻辑在controller中实现，学习成本低
+4. 上手成本低，思路简单，任何有经验的人都可以修改完善。
+5. mysql连接池支持。
+
 ## Benchmark
 都返回“hello, world!”文本内容
 > laravel使用nginx做代理
