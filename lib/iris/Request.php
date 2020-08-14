@@ -37,7 +37,7 @@ class Request
      */
     public function getUrl(): string
     {
-        return $this->rawRequest->server['request_uri'] . '?' . $this->rawRequest->server['query_string'];
+        return $this->rawRequest->server['request_uri'] . '?' . ($this->rawRequest->server['query_string'] ?? "");
     }
 
     /**
