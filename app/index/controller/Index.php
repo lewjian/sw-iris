@@ -29,7 +29,6 @@ class Index extends Controller
      */
     public function beforeAction()
     {
-        trigger_error("this is my error", E_USER_WARNING);
         println("this method called before");
     }
 

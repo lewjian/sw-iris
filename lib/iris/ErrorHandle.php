@@ -2,6 +2,8 @@
 
 namespace iris;
 
+use Throwable;
+
 class ErrorHandle
 {
     /**
@@ -53,9 +55,17 @@ class ErrorHandle
         } else {
             set_error_handler(function (int $errNo, string $errStr, string $errFile, string $errLine) {
                 $logFile = sprintf("%s/%s_err.log", Config::get("log.log_path"), date("Ymd"));
-                $msg = sprintf("[%s] %s %s %s %s", date("Y-m-d H:i:s"), self::$levelStr[$errNo], $errStr, $errFile, $errLine);
+                $msg = sprintf("[%s] %s %s %s %s %s", date("Y-m-d H:i:s"), self::$levelStr[$errNo], $errStr, $errFile, $errLine);
                 File::writeTo($logFile, $msg);
             }, self::$errorLevelMap[$errLevel]);
+
+            register_shutdown_function(function () {
+                if ($err = error_get_last()) {
+                    $logFile = sprintf("%s/%s_err.log", Config::get("log.log_path"), date("Ymd"));
+                    $msg = sprintf("[%s]%s %s %s %s", date('Y-m-d H:i:s'), self::$levelStr[$err['type']] ?? "sw-iris", $err['message'], $err['file'], $err['line']);
+                    File::writeTo($logFile, $msg);
+                }
+            });
         }
 
     }
