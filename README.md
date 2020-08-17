@@ -29,7 +29,7 @@ php server.php
 ## 优势
 1. 快：具体可以看下面的和laravel的ab benchmark，不是很严谨，但是还是能明显看出差别
 2. 中间件支持：支持全局、群组和具体路由
-3. controller支持：左右逻辑在controller中实现，学习成本低
+3. controller支持：所有逻辑在controller中实现
 4. 上手成本低，思路简单，任何有经验的人都可以修改完善。
 5. mysql连接池支持。
 
@@ -56,7 +56,7 @@ Completed 900 requests
 apr_pollset_poll: The timeout specified has expired (70007)
 Total of 994 requests completed
 
-# 换位并发10，共100个请求
+# 换为并发10，共100个请求
 ab.exe -c 10 -n 100 http://127.0.0.1:8099/
 This is ApacheBench, Version 2.3 <$Revision: 1843412 $>
 Copyright 1996 Adam Twiss, Zeus Technology Ltd, http://www.zeustech.net/
