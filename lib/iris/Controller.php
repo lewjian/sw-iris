@@ -34,4 +34,15 @@ class Controller
         $this->response->setHeader("content-type", 'application/json;charset=utf-8');
         return $data;
     }
+
+    /**
+     * 重定向
+     *
+     * @param string $url
+     * @param int $statusCode
+     */
+    protected function redirect(string $url, int $statusCode = 302)
+    {
+        $this->response->rawResponse->redirect($url, $statusCode);
+    }
 }

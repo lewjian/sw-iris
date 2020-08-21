@@ -54,4 +54,16 @@ return [
      */
 //    'http_404' => [\app\index\controller\Index::class, "handle404"],
     'http_404' => "url not exists",
+
+    /*
+     * -----------------------------------------------------------------
+     *  运行配置
+     * -----------------------------------------------------------------
+     */
+    'runtime' => [
+        'daemonize' => 0,
+        'log_file' => RUNTIME_PATH . '/log' . "/swoole.log",
+        'task_worker_num' => 4
+    ],
+
 ];

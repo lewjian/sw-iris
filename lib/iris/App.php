@@ -3,7 +3,7 @@
 namespace iris;
 
 use iris\datasource\Db;
-use iris\datasource\Mysql;
+use iris\task\Task;
 use \Swoole\Http\Server;
 use \Swoole\Http\Request;
 use \Swoole\Http\Response;
@@ -23,10 +23,14 @@ class App
 
             $addr = Env::get("LISTEN_ADDR", '127.0.0.1');
             $port = Env::get("LISTEN_PORT", 9501);
-
+            \Co::set(['hook_flags' => SWOOLE_HOOK_ALL]);
             $http = new Server($addr, $port);
             $http->set([
-//                'worker_num' => 1
+                'enable_coroutine' => true,
+                'daemonize' => Config::get("runtime.daemonize"),
+                'log_file' => Config::get("runtime.log_file"),
+                'task_worker_num' => Config::get("runtime.task_worker_num"),
+                'task_enable_coroutine' => true
             ]);
 
             $http->on("start", function ($server) use ($addr, $port) {
@@ -40,6 +44,27 @@ class App
 
             $http->on("request", function (Request $request, Response $response) {
                 self::handle($request, $response);
+            });
+
+            // 注册task
+            Task::init($http);
+
+            // 处理task
+            $http->on('task', function (Server $server, $task_id, $from_id, $data) {
+                if (isset($data['handler']) && isset($data['data'])) {
+                    $handler = $data['handler'];
+                    $param = $data['data'];
+                    $result = $handler::handle($param, $task_id, $from_id);
+                    if (!is_null($result)) {
+                        $server->finish($result);
+                    }
+                }
+
+            });
+
+            // 任务结束
+            $http->on("finish", function (Server $server, $task_id, $data) {
+                println("task finished #".$task_id, json_encode($data, 256));
             });
 
             $http->start();

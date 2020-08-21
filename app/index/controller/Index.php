@@ -2,7 +2,9 @@
 
 namespace app\index\controller;
 
+use app\common\task\SendEmail;
 use iris\Controller;
+use iris\task\Task;
 
 class Index extends Controller
 {
@@ -16,9 +18,17 @@ class Index extends Controller
     {
         println("action welcome called");
         $count = 0;
-        for ($i = 0; $i < 100000000; $i++) {
-            $count++;
-        }
+//        go(function () {
+//            $count = 0;
+//            for ($i = 0; $i < 100000000; $i++) {
+//                $count++;
+//            }
+//            println("count finish", $count);
+//        });
+        Task::addTask(SendEmail::class, [
+            'to' => 'abc@a.com',
+            'subject' => 'hello, world!'
+        ]);
         return $this->json([
             'a' => $count
         ]);

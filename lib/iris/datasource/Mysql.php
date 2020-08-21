@@ -28,7 +28,6 @@ class Mysql implements Closer
             $this->_createAt = time();
         } catch (\PDOException $exception) {
             println($exception->getMessage(), $exception->getFile(), $exception->getLine());
-            exit();
         }
     }
 

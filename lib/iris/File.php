@@ -16,6 +16,8 @@ class File
         if (Config::get("log.print_to_console")) {
             println($msg);
         }
-        file_put_contents($filename, $msg . "\n", FILE_APPEND);
+        go(function () use($filename, $msg) {
+            file_put_contents($filename, $msg . "\n", FILE_APPEND);
+        });
     }
 }
