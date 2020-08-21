@@ -32,6 +32,7 @@ php server.php
 3. controller支持：所有逻辑在controller中实现
 4. 上手成本低，思路简单，任何有经验的人都可以修改完善。
 5. mysql连接池支持。
+6. 异步耗时任务支持，利用Task::add()可以将类似发送邮件等耗时操作异步执行
 
 ## Benchmark
 都返回“hello, world!”文本内容
