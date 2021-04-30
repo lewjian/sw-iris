@@ -33,3 +33,19 @@ function println(...$args)
 {
     printf(join(" ", $args) . "\n");
 }
+
+/**
+ * 从URL分析controller name
+ *
+ * @param string $inputName
+ * @return string
+ */
+function formatControllerName(string $inputName): string
+{
+    $temp = preg_split("/_/", $inputName);
+    $name = "";
+    foreach ($temp as $item) {
+        $name .= ucfirst(strtolower($item));
+    }
+    return $name;
+}

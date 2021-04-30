@@ -10,17 +10,24 @@ use iris\Config;
 use iris\App;
 
 define("ROOT", dirname(__DIR__));
-define("LIB_PATH", ROOT . '/lib');
-define("IRIS_PATH", LIB_PATH . '/iris');
+const LIB_PATH = ROOT . '/lib';
+const IRIS_PATH = LIB_PATH . '/iris';
 
-define("CONFIG_PATH", ROOT . '/config');
-define("APP_PATH", ROOT . '/app');
-define("RUNTIME_PATH", ROOT . '/runtime');
-define("ROUTE_PATH", ROOT . '/route');
-define("MIDDLEWARE_PATH", ROOT . '/middleware');
+const CONFIG_PATH = ROOT . '/config';
+const APP_PATH = ROOT . '/app';
+const RUNTIME_PATH = ROOT . '/runtime';
+const ROUTE_PATH = ROOT . '/route';
+const MIDDLEWARE_PATH = ROOT . '/middleware';
+const PUBLIC_PATH = ROOT . '/public';
+const VENDOR_PATH = ROOT . "/vendor";
+const TPL_PATH = ROOT . "/tpl";
 
 // 注册自动加载
 require_once IRIS_PATH . '/Loader.php';
+if (file_exists(VENDOR_PATH . "/autoload.php")) {
+    require_once VENDOR_PATH . "/autoload.php";
+}
+
 Loader::register();
 
 // 解析环境变量

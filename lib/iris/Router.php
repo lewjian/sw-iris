@@ -194,9 +194,60 @@ class Router
     public static function tryMatch($uri, $requestMethod = "get"): array
     {
         if (isset(self::$routerMaps[strtoupper($requestMethod)]) && isset(self::$routerMaps[strtoupper($requestMethod)][$uri])) {
-            return self::$routerMaps[strtoupper($requestMethod)][$uri];
+            return [
+                'type' => "router",
+                "data" => self::$routerMaps[strtoupper($requestMethod)][$uri]
+            ];
         } else if (isset(self::$routerMaps['ANY']) && isset(self::$routerMaps['ANY'][$uri])) {
-            return self::$routerMaps['ANY'][$uri];
+            return [
+                'type' => "router",
+                "data" => self::$routerMaps['ANY'][$uri]
+            ];
+        } else {
+            // 尝试能否自动找到controller
+            $split_path = preg_split("/\//", trim($uri, "/"), -1);
+            if (!empty($split_path)) {
+                $len = count($split_path);
+                // 至少包含两个字符串，分别为controller和action
+                if ($len >= 2) {
+                    $relativePath = "";
+                    $controller = "";
+                    $action = "";
+                    foreach ($split_path as $key => $path) {
+                        if ($key == $len - 2) {
+                            // 倒数第二次循环，默认是controller的名称
+                            $className = formatControllerName($path);
+                            $ns = $relativePath . "/controller/" . $className ;
+                            $controllerFilename = APP_PATH .$ns. ".php";
+                            if (!file_exists($controllerFilename)) {
+                                break;
+                            }
+                            $controller = 'app'. str_replace("/", "\\", $ns);
+                        } else if ($key == $len - 1) {
+                            // 最后一次循环，默认是action
+                            $action = $path;
+                        } else {
+                            $relativePath .= "/" . $path;
+                        }
+                    }
+                    if ($controller != "" && $action != "") {
+                        return [
+                            'type' => "dynamic",
+                            "data" => [$controller, $action]
+                        ];
+                    }
+                }
+
+            }
+
+            // 尝试看下是否能找到静态文件
+            $filename = PUBLIC_PATH . $uri;
+            if (file_exists($filename)) {
+                return [
+                    "type" => "file",
+                    "data" => $filename
+                ];
+            }
         }
         return [];
     }

@@ -8,5 +8,8 @@
             "email": "cylar_lj@163.com"
         }
     ],
-    "require": {}
+    "require": {
+        "swoole/ide-helper": "^4.6",
+        "smarty/smarty": "^3.1"
+    }
 }

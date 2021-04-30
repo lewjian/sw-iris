@@ -92,20 +92,30 @@ class App
             $_404 = Config::get("http_404");
             if (is_array($_404)) {
                 $matched = $_404;
+                (new Pipeline($request, $response, $matched[0], $matched[1]))->withMiddleware($middlewares)->run();
             } else {
                 $response->status(404);
                 $response->end($_404);
                 return $response;
             }
-        }
-        if (isset($matched[2])) {
-            foreach ($matched[2] as $m) {
-                if (!in_array($m, $middlewares)) {
-                    $middlewares[] = $m;
+        } else if ($matched["type"] == "file") {
+            // 静态文件处理
+            $response->sendfile($matched['data']);
+        } else {
+            $controllerName = $matched['data'][0];
+            $actionName = $matched['data'][1];
+            if (isset($matched['data'][2])) {
+                $mds = $matched['data'][2];
+            }
+            if (isset($mds) && is_array($mds)) {
+                foreach ($mds as $m) {
+                    if (!in_array($m, $middlewares)) {
+                        $middlewares[] = $m;
+                    }
                 }
             }
+            (new Pipeline($request, $response, $controllerName, $actionName))->withMiddleware($middlewares)->run();
         }
-        (new Pipeline($request, $response, $matched[0], $matched[1]))->withMiddleware($middlewares)->run();
         return $response;
     }
 }
