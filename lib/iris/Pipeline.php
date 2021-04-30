@@ -58,7 +58,10 @@ class Pipeline
     public function run()
     {
         $response = $this->handleWithMiddleware($this->request, $this->middlewares);
-        $response->send();
+        if ($response->rawResponse->isWritable()) {
+            $response->send();
+        }
+
     }
 
     /**
